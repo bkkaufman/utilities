@@ -7,18 +7,23 @@ from pathlib import Path
 output_dir = Path(__file__).parent / "output"
 output_dir.mkdir(exist_ok=True)
 
+MAX_RESULTS=100
+ARXIV_QUERY="cat:cs.AI OR cat:cs.LG OR cat:cs.CL"
+SEARCH_DAYS=60
+
+
 # Create a client.
 client = arxiv.Client()
 
 # Search for recent AI/ML papers
 search = arxiv.Search(
-    query="cat:cs.AI OR cat:cs.LG OR cat:cs.CL",
-    max_results=150,
+    query=ARXIV_QUERY,
+    max_results=MAX_RESULTS,
     sort_by=arxiv.SortCriterion.SubmittedDate
 )
 
 # Fetch and display abstracts that have been published in the last week.
-week_ago = datetime.now() - timedelta(days=60)
+week_ago = datetime.now() - timedelta(days=SEARCH_DAYS)
 
 # Prepare markdown output
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
