@@ -1,0 +1,12 @@
+data/
+*.log
+.env
+.venv/
+.DS_Store
+__pycache__/
+node_modules/
+*.pyc
+.vscode/
+.idea/
+old/
+hf_config.txt
