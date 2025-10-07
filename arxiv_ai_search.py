@@ -7,8 +7,32 @@ from pathlib import Path
 output_dir = Path(__file__).parent / "output"
 output_dir.mkdir(exist_ok=True)
 
-MAX_RESULTS=100
-ARXIV_QUERY="cat:cs.AI OR cat:cs.LG OR cat:cs.CL"
+MAX_RESULTS=200
+'''
+ArXiv codes for search.
+
+cs.AI	Artificial Intelligence: General AI research (planning, reasoning, symbolic AI, etc.)
+cs.LG	Machine Learning: Core ML theory, algorithms, optimization, training techniques
+cs.CL	Computation and Language: NLP, LLMs, transformers, text generation, etc
+cs.CV	Computer Vision
+cs.HC	Human–Computer Interaction
+cs.RO	Robotics
+cs.IR	Information Retrieval
+cs.DC	Distributed, Parallel, and Cluster Computing (relevant for scaling)
+stat.ML	Statistics – Machine Learning (Bayesian, probabilistic, etc.)
+
+That combination will:
+- Catch LLM papers (cs.CL)
+- Include reasoning and planning (cs.AI)
+- Pull in applied ML and foundation model training (cs.LG, stat.ML)
+- Grab systems and multi-agent work (cs.DC, cs.RO)
+- Surface user experience and agentic interface work (cs.HC)
+- Bring in retrieval and hybrid RAG systems (cs.IR)
+'''
+
+# ARXIV_QUERY="cat:cs.AI OR cat:cs.LG OR cat:cs.CL"
+ARXIV_QUERY = '("foundation model" OR "agentic" OR "multi-agent" OR "autonomous system" OR "RAG" OR "retrieval" OR "pharmacovigilance" OR "medical AI") AND (cat:cs.AI OR cat:cs.LG OR cat:cs.CL OR cat:cs.CV OR cat:cs.HC OR cat:cs.IR OR cat:cs.DC OR cat:stat.ML)'
+
 SEARCH_DAYS=60
 
 
