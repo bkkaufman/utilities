@@ -10,3 +10,4 @@ node_modules/
 .idea/
 old/
 hf_config.txt
+identifier.sqlite
