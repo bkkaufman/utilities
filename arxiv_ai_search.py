@@ -2,12 +2,16 @@ import arxiv
 from datetime import datetime, timedelta
 import os
 from pathlib import Path
+from arxiv import UnexpectedEmptyPageError
 
 # Create output directory if it doesn't exist
 output_dir = Path(__file__).parent / "output"
 output_dir.mkdir(exist_ok=True)
 
-MAX_RESULTS=200
+MAX_RESULTS = 200
+PAGE_SIZE = 100         # will use offset parameter for the ArXiv search.
+SEARCH_DAYS = 90
+
 '''
 ArXiv codes for search.
 
@@ -30,40 +34,47 @@ That combination will:
 - Bring in retrieval and hybrid RAG systems (cs.IR)
 '''
 
-# ARXIV_QUERY="cat:cs.AI OR cat:cs.LG OR cat:cs.CL"
 ARXIV_QUERY = '("foundation model" OR "agentic" OR "multi-agent" OR "autonomous system" OR "RAG" OR "retrieval" OR "pharmacovigilance" OR "medical AI") AND (cat:cs.AI OR cat:cs.LG OR cat:cs.CL OR cat:cs.CV OR cat:cs.HC OR cat:cs.IR OR cat:cs.DC OR cat:stat.ML)'
-
-SEARCH_DAYS=60
-
 
 # Create a client.
 client = arxiv.Client()
-
-# Search for recent AI/ML papers
-search = arxiv.Search(
-    query=ARXIV_QUERY,
-    max_results=MAX_RESULTS,
-    sort_by=arxiv.SortCriterion.SubmittedDate
-)
-
-# Fetch and display abstracts that have been published in the last week.
 week_ago = datetime.now() - timedelta(days=SEARCH_DAYS)
 
 # Prepare markdown output
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 output_file = output_dir / f"arxiv_results_{timestamp}.md"
-
 papers_found = []
 
-for paper in client.results(search):
-    if paper.published.replace(tzinfo=None) > week_ago:
-        papers_found.append(paper)
-        print(f"Found: {paper.title}")
+# ------------------------------------------------------
+# Manual pagination using query offsets
+# ------------------------------------------------------
+try:
+    for offset in range(0, MAX_RESULTS, PAGE_SIZE):
+        # Construct query manually with pagination offset
+        search = arxiv.Search(
+            query=ARXIV_QUERY,
+            max_results=PAGE_SIZE,
+            sort_by=arxiv.SortCriterion.SubmittedDate
+        )
+        # Adjust the underlying API call offset by patching the client’s query
+        results = list(client.results(search, offset=offset))  # offset works here, not in Search()
+
+        if not results:
+            print(f"No more results at offset {offset}. Stopping.")
+            break
+
+        for paper in results:
+            if paper.published.replace(tzinfo=None) > week_ago:
+                papers_found.append(paper)
+                print(f"Found: {paper.title}")
+
+except UnexpectedEmptyPageError:
+    print("Reached end of available results (empty page from API). Continuing...")
 
 # Write to markdown file
 with open(output_file, 'w', encoding='utf-8') as f:
     f.write(f"# arXiv Search Results\n\n")
-    f.write(f"**Search Query:** `cat:cs.AI OR cat:cs.LG OR cat:cs.CL`\n\n")
+    f.write(f"**Search Query:** `{ARXIV_QUERY}`\n\n")
     f.write(f"**Date Range:** Papers published after {week_ago.date()}\n\n")
     f.write(f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
     f.write(f"**Total Papers Found:** {len(papers_found)}\n\n")
@@ -80,4 +91,3 @@ with open(output_file, 'w', encoding='utf-8') as f:
 
 print(f"\nResults saved to: {output_file}")
 print(f"Total papers: {len(papers_found)}")
-
