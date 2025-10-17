@@ -43,6 +43,7 @@ multidict==6.6.4
 networkx==3.5
 numba==0.61.2
 numpy==2.2.6
+ocrmypdf
 omegaconf==2.3.0
 openai-whisper==20250625
 optuna==4.5.0

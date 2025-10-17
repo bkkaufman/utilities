@@ -1,20 +1,25 @@
-## Brad's utilities
-
+# Brad's utilities
 
 # HEIC to PDF Converter
 
-Convert HEIC image files (iPhone photos) into a single compressed PDF document.
+Convert HEIC image files (iPhone photos) into a single compressed, searchable PDF document with built-in OCR.
 
 ## Requirements
 
 - Python 3.7 or higher
 - macOS (tested on MacBook Pro)
+- Tesseract OCR (for text recognition)
 
 ## Installation
 
-1. Install the required Python packages:
+1. Install Tesseract OCR:
 ```bash
-pip install pillow pillow-heif
+brew install tesseract
+```
+
+2. Install the required Python packages:
+```bash
+pip install pillow pillow-heif ocrmypdf
 ```
 
 ## Usage
@@ -28,12 +33,13 @@ pip install pillow pillow-heif
 python convert_heic_to_pdf.py
 ```
 
-The script will create `presentation.pdf` in the same folder.
+The script will create a searchable `presentation.pdf` in the same folder.
 
 ### Configuration
 
-You can adjust these constants at the top of the script to control output quality and file size:
+You can adjust these constants at the top of the script:
 
+**Image Quality Settings:**
 - **INPUT_FOLDER**: Folder containing HEIC files (default: current directory)
 - **OUTPUT_PDF**: Name of the output PDF file (default: "presentation.pdf")
 - **MAX_WIDTH**: Maximum image width in pixels (default: 1400)
@@ -45,28 +51,38 @@ You can adjust these constants at the top of the script to control output qualit
 - **OPTIMIZE**: Enable image optimization (default: True)
   - Keep this as True for best compression
 
-### Adding OCR (Making PDF Searchable)
+**OCR Settings:**
+- **ENABLE_OCR**: Enable text recognition (default: True)
+  - Set to False if you don't need searchable text
+- **OCR_LANGUAGE**: Language for OCR (default: "eng")
+  - Options: "eng" (English), "spa" (Spanish), "fra" (French), "deu" (German), etc.
+  - For multiple languages, use: "eng+spa"
 
-To make the PDF searchable with text recognition:
+### Additional OCR Languages
 
-1. Install OCRmyPDF:
+To install additional language packs:
 ```bash
-brew install ocrmypdf
-```
+# Spanish
+brew install tesseract-lang
 
-2. Run OCR on your PDF:
-```bash
-ocrmypdf presentation.pdf presentation_searchable.pdf --optimize 3 --jpeg-quality 80
+# Or install specific languages
+brew install tesseract-lang --with-spanish
 ```
-
-This creates a new PDF where you can search and copy text from the slides.
 
 ## Expected Output
 
 For 150 HEIC files (2-4 MB each):
 - Input total: ~300-600 MB
-- Output PDF: ~15-25 MB (approximately 100-170 KB per page)
-- Processing time: 2-5 minutes depending on your Mac
+- Output PDF: ~15-30 MB (approximately 100-200 KB per page)
+- Processing time: 5-10 minutes depending on your Mac (OCR adds extra time)
+
+## Features
+
+- **Automatic compression**: Reduces file size by 90%+ while maintaining readability
+- **OCR text layer**: Makes PDF searchable and allows text copying
+- **Batch processing**: Handles hundreds of images automatically
+- **Smart resizing**: Maintains aspect ratios while reducing resolution
+- **Progress tracking**: Shows real-time progress during conversion
 
 ## Troubleshooting
 
@@ -84,9 +100,18 @@ For 150 HEIC files (2-4 MB each):
 - Increase JPEG_QUALITY to 85 or 90
 - Note: this will increase the file size
 
+**OCR is taking too long**
+- Set ENABLE_OCR = False to skip OCR and create PDF faster
+- OCR typically adds 2-5 seconds per page
+
 **OCR "lots of diacritics" warning**
 - This is normal if your slides contain foreign language text with accents
 - For English-only slides, this may indicate image quality issues but OCR should still work
+- The warning doesn't affect the final result
+
+**"Tesseract not found" error**
+- Run: `brew install tesseract`
+- Verify installation: `tesseract --version`
 
 ## License
 
